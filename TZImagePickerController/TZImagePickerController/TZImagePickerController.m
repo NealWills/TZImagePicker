@@ -57,10 +57,23 @@
     } else {
         self.view.backgroundColor = [UIColor whiteColor];
     }
-    self.navigationBar.barStyle = UIBarStyleBlack;
-    self.navigationBar.translucent = YES;
+//    self.navigationBar.barStyle = UIBarStyleBlack;
+//    self.navigationBar.translucent = YES;
     [TZImageManager manager].shouldFixOrientation = NO;
-
+    
+    /// 状态栏高度(来电等情况下，状态栏高度会发生变化，所以应该实时计算，iOS 13 起，来电等情况下状态栏高度不会改变)
+    CGFloat tz_StatusBarHeight = (UIApplication.sharedApplication.statusBarHidden ? 0 : UIApplication.sharedApplication.statusBarFrame.size.height);
+    /// navigationBar 的静态高度
+    CGFloat tz_NavigationBarHeight = 44;
+    /// 代表(导航栏+状态栏)，这里用于获取其高度
+    CGFloat tz_NavigationContentTop = (tz_StatusBarHeight + tz_NavigationBarHeight);
+    
+    [self.navigationBar.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj isKindOfClass:[UIImageView class]]) {
+            obj.backgroundColor = [UIColor colorWithWhite:0 alpha:1];
+        }
+    }];
+    
     // Default appearance, you can reset these after this method
     // 默认的外观，你可以在这个方法后重置
     self.oKButtonTitleColorNormal   = [UIColor colorWithRed:(83/255.0) green:(179/255.0) blue:(17/255.0) alpha:1.0];
@@ -105,7 +118,7 @@
         UINavigationBarAppearance *barAppearance = [[UINavigationBarAppearance alloc] init];
         if (self.navigationBar.isTranslucent) {
             UIColor *barTintColor = self.navigationBar.barTintColor;
-            barAppearance.backgroundColor = [barTintColor colorWithAlphaComponent:0.85];
+            barAppearance.backgroundColor = [barTintColor colorWithAlphaComponent:0];
         } else {
             barAppearance.backgroundColor = self.navigationBar.barTintColor;
         }
@@ -152,7 +165,6 @@
     [super viewWillAppear:animated];
     _originStatusBarStyle = [UIApplication sharedApplication].statusBarStyle;
     [UIApplication sharedApplication].statusBarStyle = self.statusBarStyle;
-    [self configNavigationBarAppearance];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -173,9 +185,19 @@
     return [self initWithMaxImagesCount:maxImagesCount columnNumber:columnNumber delegate:delegate pushPhotoPickerVc:YES];
 }
 
+- (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate  isNeedSingleImageCrop:(BOOL)isNeedSingleImageCrop {
+    return [self initWithMaxImagesCount:maxImagesCount columnNumber:columnNumber delegate:delegate pushPhotoPickerVc:YES isNeedSingleImageCrop:isNeedSingleImageCrop];
+}
+
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate pushPhotoPickerVc:(BOOL)pushPhotoPickerVc {
+    return [self initWithMaxImagesCount:maxImagesCount columnNumber:columnNumber delegate:delegate pushPhotoPickerVc:pushPhotoPickerVc isNeedSingleImageCrop:NO];
+}
+
+- (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate pushPhotoPickerVc:(BOOL)pushPhotoPickerVc isNeedSingleImageCrop:(BOOL)isNeedSingleImageCrop {
+    _isNeedSingleImageCrop = isNeedSingleImageCrop;
     _pushPhotoPickerVc = pushPhotoPickerVc;
     TZAlbumPickerController *albumPickerVc = [[TZAlbumPickerController alloc] init];
+    albumPickerVc.isNeedSingleImageCrop = isNeedSingleImageCrop;
     albumPickerVc.isFirstAppear = YES;
     albumPickerVc.columnNumber = columnNumber;
     self = [super initWithRootViewController:albumPickerVc];
@@ -416,6 +438,7 @@
         [self pushPhotoPickerVc];
         
         TZAlbumPickerController *albumPickerVc = (TZAlbumPickerController *)self.visibleViewController;
+        albumPickerVc.isNeedSingleImageCrop = self.isNeedSingleImageCrop;
         if ([albumPickerVc isKindOfClass:[TZAlbumPickerController class]]) {
             [albumPickerVc configTableView];
         }
@@ -427,6 +450,7 @@
     // 1.6.8 判断是否需要push到照片选择页，如果_pushPhotoPickerVc为NO,则不push
     if (!_didPushPhotoPickerVc && _pushPhotoPickerVc) {
         TZPhotoPickerController *photoPickerVc = [[TZPhotoPickerController alloc] init];
+        photoPickerVc.isNeedSingleImageCrop = self.isNeedSingleImageCrop;
         photoPickerVc.isFirstAppear = YES;
         photoPickerVc.columnNumber = self.columnNumber;
         [[TZImageManager manager] getCameraRollAlbumWithFetchAssets:NO completion:^(TZAlbumModel *model) {
@@ -752,7 +776,9 @@
 @interface TZAlbumPickerController ()<UITableViewDataSource, UITableViewDelegate, PHPhotoLibraryChangeObserver> {
     UITableView *_tableView;
 }
+
 @property (nonatomic, strong) NSMutableArray *albumArr;
+
 @end
 
 @implementation TZAlbumPickerController
@@ -907,6 +933,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     TZPhotoPickerController *photoPickerVc = [[TZPhotoPickerController alloc] init];
+    photoPickerVc.isNeedSingleImageCrop = self.isNeedSingleImageCrop;
     photoPickerVc.columnNumber = self.columnNumber;
     TZAlbumModel *model = _albumArr[indexPath.row];
     photoPickerVc.model = model;
