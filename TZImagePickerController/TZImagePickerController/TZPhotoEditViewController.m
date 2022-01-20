@@ -449,8 +449,8 @@ typedef NS_ENUM(NSInteger, TZImageEditToolCurrentMoveItemStyle) {
     CGPoint point1;
     switch (ges.state) {
         case UIGestureRecognizerStateBegan:
-            point0 = [ges locationOfTouch:0 inView:self.imageView];
-            point1 = [ges locationOfTouch:1 inView:self.imageView];
+            point0 = [ges locationOfTouch:0 inView:self.view];
+            point1 = [ges locationOfTouch:1 inView:self.view];
             self.iconScaleBeginPoint = CGPointMake((point0.x + point1.x) / 2.0, (point0.y + point1.y) / 2.0);
             self.iconScaleLeftValue = (self.iconScaleBeginPoint.x - self.imageView.tz_left) / self.imageView.tz_width;
             self.iconScaleTopValue = (self.iconScaleBeginPoint.y - self.imageView.tz_top) / self.imageView.tz_height;
