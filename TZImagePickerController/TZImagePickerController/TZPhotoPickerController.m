@@ -47,6 +47,7 @@
 @property (nonatomic, strong) NSOperationQueue *operationQueue;
 @property (nonatomic, assign) BOOL isSavingMedia;
 @property (nonatomic, assign) BOOL isFetchingMedia;
+@property (nonatomic, strong) UIView *navBarBgView;
 @end
 
 static CGSize AssetGridThumbnailSize;
@@ -61,8 +62,8 @@ static CGFloat itemMargin = 5;
         _imagePickerVc = [[UIImagePickerController alloc] init];
         _imagePickerVc.delegate = self;
         // set appearance / 改变相册选择页的导航栏外观
-        _imagePickerVc.navigationBar.barTintColor = self.navigationController.navigationBar.barTintColor;
-        _imagePickerVc.navigationBar.tintColor = self.navigationController.navigationBar.tintColor;
+        _imagePickerVc.navigationBar.barTintColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:1];
+//        _imagePickerVc.navigationBar.tintColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:1];
         UIBarButtonItem *tzBarItem, *BarItem;
         if (@available(iOS 9, *)) {
             tzBarItem = [UIBarButtonItem appearanceWhenContainedInInstancesOfClasses:@[[TZImagePickerController class]]];
@@ -82,15 +83,28 @@ static CGFloat itemMargin = 5;
     if ([[TZImageManager manager] authorizationStatusAuthorized]) {
         [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
     }
+    self.navigationController.navigationBar.alpha = 0.0;
+    self.navigationController.navigationBar.barTintColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:1];
+    self.navigationController.navigationBar.translucent = NO;
+    [self.navigationController.navigationBar setBackgroundImage:[UIImage imageNamed:@"picker_nav_bg"] forBarMetrics:(UIBarMetricsDefault)];
+    self.navigationController.navigationBar.backgroundColor = [UIColor colorWithRed:48.0/255.0 green:50.0/255.0 blue:52.0/255.0 alpha:1];
+    [self.navigationController.navigationBar setShadowImage:[UIImage new]];
+    
+//    self.navBarBgView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.navigationController.navigationBar.tz_height)];
+//    [self.view addSubview:self.navBarBgView];
+//    self.navBarBgView.backgroundColor = [UIColor colorWithRed:48.0/255.0 green:50.0/255.0 blue:52.0/255.0 alpha:1];
+    
     self.isFirstAppear = YES;
     TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
     _isSelectOriginalPhoto = tzImagePickerVc.isSelectOriginalPhoto;
     _shouldScrollToBottom = YES;
-    if (@available(iOS 13.0, *)) {
-        self.view.backgroundColor = UIColor.tertiarySystemBackgroundColor;
-    } else {
-        self.view.backgroundColor = [UIColor whiteColor];
-    }
+    self.view.backgroundColor = [UIColor colorWithRed:48.0/255.0 green:50.0/255.0 blue:52.0/255.0 alpha:1];
+//    if (@available(iOS 13.0, *)) {
+//        self.view.backgroundColor = UIColor.tertiarySystemBackgroundColor;
+//    } else {
+//        self.view.backgroundColor = [UIColor whiteColor];
+//    }
+    
     self.navigationItem.title = _model.name;
     UIBarButtonItem *cancelItem = [[UIBarButtonItem alloc] initWithTitle:tzImagePickerVc.cancelBtnTitleStr style:UIBarButtonItemStylePlain target:tzImagePickerVc action:@selector(cancelButtonClick)];
     [TZCommonTools configBarButtonItem:cancelItem tzImagePickerVc:tzImagePickerVc];
@@ -164,22 +178,29 @@ static CGFloat itemMargin = 5;
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
-    TZImagePickerController *tzImagePicker = (TZImagePickerController *)self.navigationController;
-    if (tzImagePicker && [tzImagePicker isKindOfClass:[TZImagePickerController class]]) {
-        return tzImagePicker.statusBarStyle;
+//    TZImagePickerController *tzImagePicker = (TZImagePickerController *)self.navigationController;
+//    if (tzImagePicker && [tzImagePicker isKindOfClass:[TZImagePickerController class]]) {
+//        return tzImagePicker.statusBarStyle;
+//    }
+//    return [super preferredStatusBarStyle];
+    
+    if (@available(iOS 13.0, *)) {
+        return UIStatusBarStyleDarkContent;
+    } else {
+        return UIStatusBarStyleDefault;
     }
-    return [super preferredStatusBarStyle];
 }
 
 - (void)configCollectionView {
     if (!_collectionView) {
         _layout = [[UICollectionViewFlowLayout alloc] init];
         _collectionView = [[TZCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:_layout];
-        if (@available(iOS 13.0, *)) {
-            _collectionView.backgroundColor = UIColor.tertiarySystemBackgroundColor;
-        } else {
-            _collectionView.backgroundColor = [UIColor whiteColor];
-        }
+//        if (@available(iOS 13.0, *)) {
+//            _collectionView.backgroundColor = UIColor.tertiarySystemBackgroundColor;
+//        } else {
+//            _collectionView.backgroundColor = [UIColor whiteColor];
+//        }
+        _collectionView.backgroundColor = [UIColor colorWithRed:48.0/255.0 green:50.0/255.0 blue:52.0/255.0 alpha:1];
         _collectionView.dataSource = self;
         _collectionView.delegate = self;
         _collectionView.alwaysBounceHorizontal = NO;
@@ -238,24 +259,22 @@ static CGFloat itemMargin = 5;
     if (!tzImagePickerVc.showSelectBtn) return;
     
     _bottomToolBar = [[UIView alloc] initWithFrame:CGRectZero];
-    CGFloat rgb = 253 / 255.0;
-    if (@available(iOS 13.0, *)) {
-        _bottomToolBar.backgroundColor = UIColor.tertiarySystemBackgroundColor;
-    } else {
-        _bottomToolBar.backgroundColor = [UIColor colorWithRed:rgb green:rgb blue:rgb alpha:1.0];
-    }
+//    CGFloat rgb = 253 / 255.0;
+//    if (@available(iOS 13.0, *)) {
+//        _bottomToolBar.backgroundColor = UIColor.tertiarySystemBackgroundColor;
+//    } else {
+//        _bottomToolBar.backgroundColor = [UIColor colorWithRed:rgb green:rgb blue:rgb alpha:1.0];
+//    }
+    
+    _bottomToolBar.backgroundColor = [UIColor colorWithRed:48.0/255.0 green:50.0/255.0 blue:52.0/255.0 alpha:1];
     
     _previewButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [_previewButton addTarget:self action:@selector(previewButtonClick) forControlEvents:UIControlEventTouchUpInside];
     _previewButton.titleLabel.font = [UIFont systemFontOfSize:16];
     [_previewButton setTitle:tzImagePickerVc.previewBtnTitleStr forState:UIControlStateNormal];
     [_previewButton setTitle:tzImagePickerVc.previewBtnTitleStr forState:UIControlStateDisabled];
-    if (@available(iOS 13.0, *)) {
-        [_previewButton setTitleColor:UIColor.labelColor forState:UIControlStateNormal];
-    } else {
-        [_previewButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    }
-    [_previewButton setTitleColor:[UIColor lightGrayColor] forState:UIControlStateDisabled];
+    [_previewButton setTitleColor:tzImagePickerVc.oKButtonTitleColorNormal forState:UIControlStateNormal];
+    [_previewButton setTitleColor:tzImagePickerVc.oKButtonTitleColorDisabled forState:UIControlStateDisabled];
     _previewButton.enabled = tzImagePickerVc.selectedModels.count;
     
     if (tzImagePickerVc.allowPickingOriginalPhoto) {
@@ -265,12 +284,8 @@ static CGFloat itemMargin = 5;
         _originalPhotoButton.titleLabel.font = [UIFont systemFontOfSize:16];
         [_originalPhotoButton setTitle:tzImagePickerVc.fullImageBtnTitleStr forState:UIControlStateNormal];
         [_originalPhotoButton setTitle:tzImagePickerVc.fullImageBtnTitleStr forState:UIControlStateSelected];
-        [_originalPhotoButton setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
-        if (@available(iOS 13.0, *)) {
-            [_originalPhotoButton setTitleColor:[UIColor labelColor] forState:UIControlStateSelected];
-        } else {
-            [_originalPhotoButton setTitleColor:[UIColor blackColor] forState:UIControlStateSelected];
-        }
+        [_originalPhotoButton setTitleColor:tzImagePickerVc.oKButtonTitleColorDisabled forState:UIControlStateNormal];
+        [_originalPhotoButton setTitleColor:tzImagePickerVc.oKButtonTitleColorNormal forState:UIControlStateSelected];
         [_originalPhotoButton setImage:tzImagePickerVc.photoOriginDefImage forState:UIControlStateNormal];
         [_originalPhotoButton setImage:tzImagePickerVc.photoOriginSelImage forState:UIControlStateSelected];
         _originalPhotoButton.imageView.clipsToBounds = YES;
@@ -318,20 +333,20 @@ static CGFloat itemMargin = 5;
     [_numberLabel addGestureRecognizer:tapGesture];
     
     _divideLine = [[UIView alloc] init];
-    CGFloat rgb2 = 222 / 255.0;
-    if (@available(iOS 13.0, *)) {
-        UIColor *divideLineDyColor = [UIColor colorWithDynamicProvider:^UIColor * _Nonnull(UITraitCollection * _Nonnull trainCollection) {
-            if ([trainCollection userInterfaceStyle] == UIUserInterfaceStyleLight) {
-                return [UIColor colorWithRed:rgb2 green:rgb2 blue:rgb2 alpha:1.0];
-            } else {
-                CGFloat lineDarkRgb = 100 / 255.0;
-                return [UIColor colorWithRed:lineDarkRgb green:lineDarkRgb blue:lineDarkRgb alpha:1.0];
-            }
-        }];
-        _divideLine.backgroundColor = divideLineDyColor;
-    } else {
+    CGFloat rgb2 = 70 / 255.0;
+//    if (@available(iOS 13.0, *)) {
+//        UIColor *divideLineDyColor = [UIColor colorWithDynamicProvider:^UIColor * _Nonnull(UITraitCollection * _Nonnull trainCollection) {
+//            if ([trainCollection userInterfaceStyle] == UIUserInterfaceStyleLight) {
+//                return [UIColor colorWithRed:rgb2 green:rgb2 blue:rgb2 alpha:1.0];
+//            } else {
+//                CGFloat lineDarkRgb = 100 / 255.0;
+//                return [UIColor colorWithRed:lineDarkRgb green:lineDarkRgb blue:lineDarkRgb alpha:1.0];
+//            }
+//        }];
+//        _divideLine.backgroundColor = divideLineDyColor;
+//    } else {
         _divideLine.backgroundColor = [UIColor colorWithRed:rgb2 green:rgb2 blue:rgb2 alpha:1.0];
-    }
+//    }
     
     [_bottomToolBar addSubview:_divideLine];
     [_bottomToolBar addSubview:_previewButton];
@@ -568,10 +583,10 @@ static CGFloat itemMargin = 5;
         cell.imageView.image = tzImagePickerVc.takePictureImage;
         if ([tzImagePickerVc.takePictureImageName isEqualToString:@"takePicture80"]) {
             cell.imageView.contentMode = UIViewContentModeCenter;
-            CGFloat rgb = 223 / 255.0;
+            CGFloat rgb = 32 / 255.0;
             cell.imageView.backgroundColor = [UIColor colorWithRed:rgb green:rgb blue:rgb alpha:1.0];
         } else {
-            cell.imageView.backgroundColor = [UIColor colorWithWhite:1.000 alpha:0.500];
+            cell.imageView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.500];
         }
         return cell;
     }
