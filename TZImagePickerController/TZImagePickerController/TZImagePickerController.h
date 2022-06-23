@@ -4,7 +4,7 @@
 //
 //  Created by 谭真 on 15/12/24.
 //  Copyright © 2015年 谭真. All rights reserved.
-//  version 3.7.2 - 2022.01.12
+//  version 3.8.1 - 2022.04.15
 //  更多信息，请前往项目的github地址：https://github.com/banchichen/TZImagePickerController
 
 /*
@@ -26,6 +26,9 @@
 #import "TZPhotoPreviewController.h"
 #import "TZPhotoPreviewCell.h"
 
+#define CURRENT_SYSTEM_VERSION         [[UIDevice currentDevice] systemVersion]
+#define SYSTEM_VERSION_GREATER_THAN_15 ([CURRENT_SYSTEM_VERSION floatValue] >= 15.0)
+
 @class TZAlbumCell, TZAssetCell;
 @protocol TZImagePickerControllerDelegate;
 @interface TZImagePickerController : UINavigationController
@@ -35,7 +38,6 @@
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount delegate:(id<TZImagePickerControllerDelegate>)delegate;
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate;
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate pushPhotoPickerVc:(BOOL)pushPhotoPickerVc;
-- (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate  isNeedSingleImageCrop:(BOOL)isNeedSingleImageCrop;
 /// This init method just for previewing photos / 用这个初始化方法以预览图片
 - (instancetype)initWithSelectedAssets:(NSMutableArray *)selectedAssets selectedPhotos:(NSMutableArray *)selectedPhotos index:(NSInteger)index;
 /// This init method for crop photo / 用这个初始化方法以裁剪图片
@@ -157,8 +159,6 @@
 /// 默认是NO，如果设置为YES，导出视频时会修正转向（慎重设为YES，可能导致部分安卓下拍的视频导出失败）
 @property (assign, nonatomic) BOOL needFixComposition;
 
-@property (nonatomic, assign) BOOL isNeedSingleImageCrop; // 是否需要单张图片剪裁 （高级剪裁）
-
 /// The photos user have selected
 /// 用户选中过的图片数组
 @property (nonatomic, strong) NSMutableArray *selectedAssets;
@@ -232,6 +232,7 @@
 @property (nonatomic, copy) NSString *photoPreviewOriginDefImageName __attribute__((deprecated("Use -photoPreviewOriginDefImage.")));
 @property (nonatomic, copy) NSString *photoNumberIconImageName __attribute__((deprecated("Use -photoNumberIconImage.")));
 @property (nonatomic, strong) UIImage *takePictureImage;
+@property (nonatomic, strong) UIImage *addMorePhotoImage;
 @property (nonatomic, strong) UIImage *photoSelImage;
 @property (nonatomic, strong) UIImage *photoDefImage;
 @property (nonatomic, strong) UIImage *photoOriginSelImage;
@@ -344,7 +345,6 @@
 @interface TZAlbumPickerController : UIViewController
 @property (nonatomic, assign) NSInteger columnNumber;
 @property (assign, nonatomic) BOOL isFirstAppear;
-@property (assign, nonatomic) BOOL isNeedSingleImageCrop;
 - (void)configTableView;
 @end
 

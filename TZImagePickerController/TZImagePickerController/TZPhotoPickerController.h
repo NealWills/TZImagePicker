@@ -14,7 +14,6 @@
 @property (nonatomic, assign) BOOL isFirstAppear;
 @property (nonatomic, assign) NSInteger columnNumber;
 @property (nonatomic, strong) TZAlbumModel *model;
-@property (nonatomic, assign) BOOL isNeedSingleImageCrop; // 是否需要单张图片剪裁 （高级剪裁）
 @end
 
 

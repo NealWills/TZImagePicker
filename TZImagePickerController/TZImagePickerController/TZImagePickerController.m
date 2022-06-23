@@ -4,7 +4,7 @@
 //
 //  Created by 谭真 on 15/12/24.
 //  Copyright © 2015年 谭真. All rights reserved.
-//  version 3.7.2 - 2022.01.12
+//  version 3.8.1 - 2022.04.15
 //  更多信息，请前往项目的github地址：https://github.com/banchichen/TZImagePickerController
 
 #import "TZImagePickerController.h"
@@ -57,24 +57,10 @@
     } else {
         self.view.backgroundColor = [UIColor whiteColor];
     }
-//    self.navigationBar.barStyle = UIBarStyleBlack;
-//    self.navigationBar.translucent = YES;
+    self.navigationBar.barStyle = UIBarStyleBlack;
+    self.navigationBar.translucent = YES;
     [TZImageManager manager].shouldFixOrientation = NO;
-    self.view.backgroundColor = [UIColor colorWithRed:48.0/255.0 green:50.0/255.0 blue:52.0/255.0 alpha:1];
-    
-    /// 状态栏高度(来电等情况下，状态栏高度会发生变化，所以应该实时计算，iOS 13 起，来电等情况下状态栏高度不会改变)
-    CGFloat tz_StatusBarHeight = (UIApplication.sharedApplication.statusBarHidden ? 0 : UIApplication.sharedApplication.statusBarFrame.size.height);
-    /// navigationBar 的静态高度
-    CGFloat tz_NavigationBarHeight = 44;
-    /// 代表(导航栏+状态栏)，这里用于获取其高度
-    CGFloat tz_NavigationContentTop = (tz_StatusBarHeight + tz_NavigationBarHeight);
-    
-    [self.navigationBar.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        if ([obj isKindOfClass:[UIImageView class]]) {
-            obj.backgroundColor = [UIColor colorWithWhite:0 alpha:1];
-        }
-    }];
-    
+
     // Default appearance, you can reset these after this method
     // 默认的外观，你可以在这个方法后重置
     self.oKButtonTitleColorNormal   = [UIColor colorWithRed:(83/255.0) green:(179/255.0) blue:(17/255.0) alpha:1.0];
@@ -118,10 +104,10 @@
     if (@available(iOS 13.0, *)) {
         UINavigationBarAppearance *barAppearance = [[UINavigationBarAppearance alloc] init];
         if (self.navigationBar.isTranslucent) {
-//            UIColor *barTintColor = self.navigationBar.barTintColor;
-//            barAppearance.backgroundColor = [barTintColor colorWithAlphaComponent:0];
+            UIColor *barTintColor = self.navigationBar.barTintColor;
+            barAppearance.backgroundColor = [barTintColor colorWithAlphaComponent:0.85];
         } else {
-//            barAppearance.backgroundColor = self.navigationBar.barTintColor;
+            barAppearance.backgroundColor = self.navigationBar.barTintColor;
         }
         barAppearance.titleTextAttributes = self.navigationBar.titleTextAttributes;
         self.navigationBar.standardAppearance = barAppearance;
@@ -166,6 +152,7 @@
     [super viewWillAppear:animated];
     _originStatusBarStyle = [UIApplication sharedApplication].statusBarStyle;
     [UIApplication sharedApplication].statusBarStyle = self.statusBarStyle;
+    [self configNavigationBarAppearance];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -186,19 +173,9 @@
     return [self initWithMaxImagesCount:maxImagesCount columnNumber:columnNumber delegate:delegate pushPhotoPickerVc:YES];
 }
 
-- (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate  isNeedSingleImageCrop:(BOOL)isNeedSingleImageCrop {
-    return [self initWithMaxImagesCount:maxImagesCount columnNumber:columnNumber delegate:delegate pushPhotoPickerVc:YES isNeedSingleImageCrop:isNeedSingleImageCrop];
-}
-
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate pushPhotoPickerVc:(BOOL)pushPhotoPickerVc {
-    return [self initWithMaxImagesCount:maxImagesCount columnNumber:columnNumber delegate:delegate pushPhotoPickerVc:pushPhotoPickerVc isNeedSingleImageCrop:NO];
-}
-
-- (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate pushPhotoPickerVc:(BOOL)pushPhotoPickerVc isNeedSingleImageCrop:(BOOL)isNeedSingleImageCrop {
-    _isNeedSingleImageCrop = isNeedSingleImageCrop;
     _pushPhotoPickerVc = pushPhotoPickerVc;
     TZAlbumPickerController *albumPickerVc = [[TZAlbumPickerController alloc] init];
-    albumPickerVc.isNeedSingleImageCrop = isNeedSingleImageCrop;
     albumPickerVc.isFirstAppear = YES;
     albumPickerVc.columnNumber = columnNumber;
     self = [super initWithRootViewController:albumPickerVc];
@@ -345,6 +322,7 @@
     self.photoPreviewOriginDefImageName = @"preview_original_def";
     self.photoOriginDefImageName = @"photo_original_def";
     self.photoOriginSelImageName = @"photo_original_sel";
+    self.addMorePhotoImage = [UIImage tz_imageNamedFromMyBundle:@"addMore"];
 }
 
 - (void)setTakePictureImageName:(NSString *)takePictureImageName {
@@ -439,7 +417,6 @@
         [self pushPhotoPickerVc];
         
         TZAlbumPickerController *albumPickerVc = (TZAlbumPickerController *)self.visibleViewController;
-        albumPickerVc.isNeedSingleImageCrop = self.isNeedSingleImageCrop;
         if ([albumPickerVc isKindOfClass:[TZAlbumPickerController class]]) {
             [albumPickerVc configTableView];
         }
@@ -451,7 +428,6 @@
     // 1.6.8 判断是否需要push到照片选择页，如果_pushPhotoPickerVc为NO,则不push
     if (!_didPushPhotoPickerVc && _pushPhotoPickerVc) {
         TZPhotoPickerController *photoPickerVc = [[TZPhotoPickerController alloc] init];
-        photoPickerVc.isNeedSingleImageCrop = self.isNeedSingleImageCrop;
         photoPickerVc.isFirstAppear = YES;
         photoPickerVc.columnNumber = self.columnNumber;
         [[TZImageManager manager] getCameraRollAlbumWithFetchAssets:NO completion:^(TZAlbumModel *model) {
@@ -777,16 +753,14 @@
 @interface TZAlbumPickerController ()<UITableViewDataSource, UITableViewDelegate, PHPhotoLibraryChangeObserver> {
     UITableView *_tableView;
 }
-
 @property (nonatomic, strong) NSMutableArray *albumArr;
-
 @end
 
 @implementation TZAlbumPickerController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    if ([[TZImageManager manager] authorizationStatusAuthorized]) {
+    if ([[TZImageManager manager] authorizationStatusAuthorized] || !SYSTEM_VERSION_GREATER_THAN_15) {
         [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
     }
     self.isFirstAppear = YES;
@@ -934,7 +908,6 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     TZPhotoPickerController *photoPickerVc = [[TZPhotoPickerController alloc] init];
-    photoPickerVc.isNeedSingleImageCrop = self.isNeedSingleImageCrop;
     photoPickerVc.columnNumber = self.columnNumber;
     TZAlbumModel *model = _albumArr[indexPath.row];
     photoPickerVc.model = model;
@@ -1097,7 +1070,7 @@
     dispatch_once(&onceToken, ^{
         if (config == nil) {
             config = [[TZImagePickerConfig alloc] init];
-            config.supportedLanguages = [NSSet setWithObjects:@"zh-Hans", @"zh-Hant", @"en", @"ar", @"bg", @"cs-CZ", @"de", @"el", @"es", @"fr", @"he", @"it", @"ja", @"ko-KP", @"ko", @"nl", @"pl", @"pt", @"ro", @"ru", @"sk", @"sv", @"th", @"tr", @"uk", @"vi", nil];
+            config.supportedLanguages = [NSSet setWithObjects:@"zh-Hans", @"zh-Hant", @"en", @"ar", @"de", @"es", @"fr", @"ja", @"ko-KP", @"pt", @"ru", @"vi", nil];
             config.preferredLanguage = nil;
             config.gifPreviewMaxImagesCount = 50;
         }
@@ -1120,7 +1093,6 @@
         }
     }
     _languageBundle = [NSBundle bundleWithPath:[[NSBundle tz_imagePickerBundle] pathForResource:usedLanguage ofType:@"lproj"]];
-
 }
 
 @end
