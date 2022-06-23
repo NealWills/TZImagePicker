@@ -296,11 +296,12 @@ static CGFloat itemMargin = 5;
         _originalPhotoLabel = [[UILabel alloc] init];
         _originalPhotoLabel.textAlignment = NSTextAlignmentLeft;
         _originalPhotoLabel.font = [UIFont systemFontOfSize:16];
-        if (@available(iOS 13.0, *)) {
-            _originalPhotoLabel.textColor = [UIColor labelColor];
-        } else {
-            _originalPhotoLabel.textColor = [UIColor blackColor];
-        }
+        _originalPhotoLabel.textColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:1];
+//        if (@available(iOS 13.0, *)) {
+//            _originalPhotoLabel.textColor = [UIColor labelColor];
+//        } else {
+//            _originalPhotoLabel.textColor = [UIColor blackColor];
+//        }
         if (_isSelectOriginalPhoto) [self getSelectedPhotoBytes];
     }
     

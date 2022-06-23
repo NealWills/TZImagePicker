@@ -60,6 +60,7 @@
 //    self.navigationBar.barStyle = UIBarStyleBlack;
 //    self.navigationBar.translucent = YES;
     [TZImageManager manager].shouldFixOrientation = NO;
+    self.view.backgroundColor = [UIColor colorWithRed:48.0/255.0 green:50.0/255.0 blue:52.0/255.0 alpha:1];
     
     /// 状态栏高度(来电等情况下，状态栏高度会发生变化，所以应该实时计算，iOS 13 起，来电等情况下状态栏高度不会改变)
     CGFloat tz_StatusBarHeight = (UIApplication.sharedApplication.statusBarHidden ? 0 : UIApplication.sharedApplication.statusBarFrame.size.height);
@@ -114,18 +115,18 @@
 }
 
 - (void)configNavigationBarAppearance {
-//    if (@available(iOS 13.0, *)) {
-//        UINavigationBarAppearance *barAppearance = [[UINavigationBarAppearance alloc] init];
-//        if (self.navigationBar.isTranslucent) {
+    if (@available(iOS 13.0, *)) {
+        UINavigationBarAppearance *barAppearance = [[UINavigationBarAppearance alloc] init];
+        if (self.navigationBar.isTranslucent) {
 //            UIColor *barTintColor = self.navigationBar.barTintColor;
 //            barAppearance.backgroundColor = [barTintColor colorWithAlphaComponent:0];
-//        } else {
+        } else {
 //            barAppearance.backgroundColor = self.navigationBar.barTintColor;
-//        }
-//        barAppearance.titleTextAttributes = self.navigationBar.titleTextAttributes;
-//        self.navigationBar.standardAppearance = barAppearance;
-//        self.navigationBar.scrollEdgeAppearance = barAppearance;
-//    }
+        }
+        barAppearance.titleTextAttributes = self.navigationBar.titleTextAttributes;
+        self.navigationBar.standardAppearance = barAppearance;
+        self.navigationBar.scrollEdgeAppearance = barAppearance;
+    }
 }
 
 - (void)setBarItemTextFont:(UIFont *)barItemTextFont {
