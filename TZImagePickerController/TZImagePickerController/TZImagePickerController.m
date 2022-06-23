@@ -173,11 +173,21 @@
     return [self initWithMaxImagesCount:maxImagesCount columnNumber:columnNumber delegate:delegate pushPhotoPickerVc:YES];
 }
 
+- (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate  isNeedSingleImageCrop:(BOOL)isNeedSingleImageCrop {
+    return [self initWithMaxImagesCount:maxImagesCount columnNumber:columnNumber delegate:delegate pushPhotoPickerVc:YES isNeedSingleImageCrop:isNeedSingleImageCrop];
+}
+
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate pushPhotoPickerVc:(BOOL)pushPhotoPickerVc {
+    return [self initWithMaxImagesCount:maxImagesCount columnNumber:columnNumber delegate:delegate pushPhotoPickerVc:pushPhotoPickerVc isNeedSingleImageCrop:NO];
+}
+
+- (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate pushPhotoPickerVc:(BOOL)pushPhotoPickerVc isNeedSingleImageCrop:(BOOL)isNeedSingleImageCrop {
+    _isNeedSingleImageCrop = isNeedSingleImageCrop;
     _pushPhotoPickerVc = pushPhotoPickerVc;
     TZAlbumPickerController *albumPickerVc = [[TZAlbumPickerController alloc] init];
     albumPickerVc.isFirstAppear = YES;
     albumPickerVc.columnNumber = columnNumber;
+    albumPickerVc.isNeedSingleImageCrop = isNeedSingleImageCrop;
     self = [super initWithRootViewController:albumPickerVc];
     if (self) {
         self.maxImagesCount = maxImagesCount > 0 ? maxImagesCount : 9; // Default is 9 / 默认最大可选9张图片
@@ -417,6 +427,7 @@
         [self pushPhotoPickerVc];
         
         TZAlbumPickerController *albumPickerVc = (TZAlbumPickerController *)self.visibleViewController;
+        albumPickerVc.isNeedSingleImageCrop = self.isNeedSingleImageCrop;
         if ([albumPickerVc isKindOfClass:[TZAlbumPickerController class]]) {
             [albumPickerVc configTableView];
         }
@@ -428,6 +439,7 @@
     // 1.6.8 判断是否需要push到照片选择页，如果_pushPhotoPickerVc为NO,则不push
     if (!_didPushPhotoPickerVc && _pushPhotoPickerVc) {
         TZPhotoPickerController *photoPickerVc = [[TZPhotoPickerController alloc] init];
+        photoPickerVc.isNeedSingleImageCrop = self.isNeedSingleImageCrop;
         photoPickerVc.isFirstAppear = YES;
         photoPickerVc.columnNumber = self.columnNumber;
         [[TZImageManager manager] getCameraRollAlbumWithFetchAssets:NO completion:^(TZAlbumModel *model) {
@@ -908,6 +920,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     TZPhotoPickerController *photoPickerVc = [[TZPhotoPickerController alloc] init];
+    photoPickerVc.isNeedSingleImageCrop = self.isNeedSingleImageCrop;
     photoPickerVc.columnNumber = self.columnNumber;
     TZAlbumModel *model = _albumArr[indexPath.row];
     photoPickerVc.model = model;

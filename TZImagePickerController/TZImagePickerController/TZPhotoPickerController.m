@@ -19,7 +19,9 @@
 #import <MobileCoreServices/MobileCoreServices.h>
 #import "TZImageRequestOperation.h"
 #import "TZAuthLimitedFooterTipView.h"
+#import "TZPhotoEditViewController.h"
 #import <PhotosUI/PhotosUI.h>
+
 @interface TZPhotoPickerController ()<UICollectionViewDataSource,UICollectionViewDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate, PHPhotoLibraryChangeObserver> {
     NSMutableArray *_models;
     
@@ -879,10 +881,49 @@ static CGFloat itemMargin = 5;
 }
 
 - (void)pushPhotoPrevireViewController:(TZPhotoPreviewController *)photoPreviewVc {
-    [self pushPhotoPrevireViewController:photoPreviewVc needCheckSelectedModels:NO];
+//    [self pushPhotoPrevireViewController:photoPreviewVc needCheckSelectedModels:NO];
+    if (!self.isNeedSingleImageCrop) {
+        [self pushPhotoPrevireViewController:photoPreviewVc needCheckSelectedModels:NO];
+        return;
+    }
+    
+    __weak typeof(self) weakSelf = self;
+    if (photoPreviewVc.models.count <= photoPreviewVc.currentIndex) { return; }
+    TZAssetModel *assetsModel = photoPreviewVc.models[photoPreviewVc.currentIndex];
+    [[TZImageManager manager] requestImageDataForAsset:assetsModel.asset completion:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
+        UIImage *image = [UIImage imageWithData:imageData];
+        if (!image) { return; }
+        TZPhotoEditViewController *vc = [[TZPhotoEditViewController alloc] init];
+        vc.icon = image;
+        [weakSelf.navigationController pushViewController:vc animated:YES];
+        [vc setFinishHandel:^(UIImage * _Nonnull resultImage, NSString * _Nonnull filePath) {
+            NSArray *assets = @[];
+            if (assetsModel.asset) {
+                assets = @[assetsModel.asset];
+            }
+            NSArray *photos = @[];
+            if (resultImage) {
+                photos = @[resultImage];
+            } else {
+                photos = @[image];
+            }
+            [weakSelf didGetAllPhotos:photos assets:assets infoArr:nil];
+        }];
+        [vc setCancelHandel:^{
+            [weakSelf.navigationController popViewControllerAnimated:YES];
+        }];
+    } progressHandler:^(double progress, NSError *error, BOOL *stop, NSDictionary *info) {
+        
+    }];
+
 }
 
 - (void)pushPhotoPrevireViewController:(TZPhotoPreviewController *)photoPreviewVc needCheckSelectedModels:(BOOL)needCheckSelectedModels {
+    
+    if (self.isNeedSingleImageCrop) {
+        return;
+    }
+
     __weak typeof(self) weakSelf = self;
     photoPreviewVc.isSelectOriginalPhoto = _isSelectOriginalPhoto;
     [photoPreviewVc setBackButtonClickBlock:^(BOOL isSelectOriginalPhoto) {

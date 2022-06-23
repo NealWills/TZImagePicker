@@ -35,6 +35,7 @@
 
 #pragma mark -
 /// Use this init method / 用这个初始化方法
+- (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate  isNeedSingleImageCrop:(BOOL)isNeedSingleImageCrop;
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount delegate:(id<TZImagePickerControllerDelegate>)delegate;
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate;
 - (instancetype)initWithMaxImagesCount:(NSInteger)maxImagesCount columnNumber:(NSInteger)columnNumber delegate:(id<TZImagePickerControllerDelegate>)delegate pushPhotoPickerVc:(BOOL)pushPhotoPickerVc;
@@ -158,6 +159,8 @@
 
 /// 默认是NO，如果设置为YES，导出视频时会修正转向（慎重设为YES，可能导致部分安卓下拍的视频导出失败）
 @property (assign, nonatomic) BOOL needFixComposition;
+
+@property (nonatomic, assign) BOOL isNeedSingleImageCrop; // 是否需要单张图片剪裁 （高级剪裁）
 
 /// The photos user have selected
 /// 用户选中过的图片数组
@@ -345,6 +348,7 @@
 @interface TZAlbumPickerController : UIViewController
 @property (nonatomic, assign) NSInteger columnNumber;
 @property (assign, nonatomic) BOOL isFirstAppear;
+@property (assign, nonatomic) BOOL isNeedSingleImageCrop;
 - (void)configTableView;
 @end
 
