@@ -98,7 +98,7 @@ static CGFloat itemMargin = 5;
     TZImagePickerController *tzImagePickerVc = (TZImagePickerController *)self.navigationController;
     _isSelectOriginalPhoto = tzImagePickerVc.isSelectOriginalPhoto;
     _shouldScrollToBottom = YES;
-    self.view.backgroundColor = [UIColor colorWithRed:48.0/255.0 green:50.0/255.0 blue:52.0/255.0 alpha:1];
+    self.view.backgroundColor = [UIColor colorWithRed:48.0/255.0 green:50.0/255.0 blue:52.0/255.0 alpha:1]; 
 //    if (@available(iOS 13.0, *)) {
 //        self.view.backgroundColor = UIColor.tertiarySystemBackgroundColor;
 //    } else {
